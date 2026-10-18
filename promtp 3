@@ -1,0 +1,97 @@
+### SYSTEM PROMPT: Build "GuruPredict v3.0 Ultra" with Floating Overlay HUD & Screen Vision Analyzer (Flutter + Android Native Integration)
+
+Act as a Principal Android Systems Architect, Computer Vision Engineer, and Senior Flutter Developer. Build the complete architecture and runnable codebase for **"GuruPredict v3.0"**, an advanced Statistical Pattern Analyzer featuring a **Floating Overlay Widget ("Display Over Other Apps")** and an **Automated Screen Vision Scanner (OCR + Pixel Color Detection)**.
+
+**Compliance & Architecture Note:** This app involves ZERO real-money transactions. It operates as an on-screen statistical probability assistant and virtual risk calculator using standard Android `SYSTEM_ALERT_WINDOW` and `MediaProjection` APIs.
+
+---
+
+### 1. MANDATORY BRANDING & IDENTITY (HARDCODED IN MAIN APP & FLOATING HUD)
+* **App Name:** GuruPredict
+* **Owner / Architect:** Harsh Patel
+* **Official Branding Tag:** HarshGuruJi
+* **Official Website URL:** www.webguruji.online (Must appear in the Floating Mini-HUD header, Main App Header, Splash Screen, and Brand Hub tab).
+
+---
+
+### 2. NEW CORE WORKFLOW: FLOATING OVERLAY + SCREEN VISION ANALYZER
+
+#### Phase 1: Permission & Calibration Setup
+1. **Overlay Permission (`SYSTEM_ALERT_WINDOW`):** User clicks `[ Grant Overlay Permission ]` to allow GuruPredict to draw its floating HUD over other apps.
+2. **Screen Capture Permission (`MediaProjection` / `AccessibilityService`):** User clicks `[ Enable Screen Vision Engine ]` to allow the app to take periodic frame snapshots (every 2 seconds) of the active screen.
+3. **Interactive Target Box Calibrator (ROI Selector):**
+   - When the floating overlay launches over the target app, the user can drag a transparent **Green Calibration Frame (Region of Interest - ROI)** over the target app's "Recent History Row" and "Period ID / Timer" area, then tap `[ Lock Scan Area ]`.
+
+#### Phase 2: Automated Screen Analysis (Dual-Engine Detection)
+Every 2 seconds (or when the user taps `[ ⚡ Scan Now ]` on the floating widget), the analyzer processes the locked ROI region:
+1. **Pixel HSV Color Clustering (For Color Dots):**
+   - Scans the horizontal row of recent result circles inside the ROI.
+   - Converts RGB pixels to HSV color space to accurately classify:
+     - **Green Circle:** Hue `85°–155°`
+     - **Red Circle:** Hue `0°–15°` or `340°–360°`
+     - **Violet Circle:** Hue `265°–315°`
+2. **On-Device OCR Text Recognition (`Google ML Kit Text Recognition`):**
+   - Reads the current **Period Number** (e.g., `20261018045`) and **Digits (`0`–`9`)** inside the result balls.
+   - Automatically detects when a new Period ID appears on screen, appends the latest result to the database, verifies whether the previous prediction was a `WIN ✅` or `LOSS ❌`, and triggers the next prediction automatically!
+
+#### Phase 3: Fallback Hybrid Mode (For Single-File / Web / Emulator Testing)
+- Include a built-in **"Live Screen Vision Simulator & Split-Screen Test Environment"** inside the Flutter app so the entire Screen Scanning + Floating HUD workflow can be tested immediately even before compiling native Android platform channels.
+
+---
+
+### 3. FLOATING OVERLAY HUD UI/UX DESIGN (DISPLAY OVER OTHER APPS)
+
+The Floating Overlay must support **2 States**:
+1. **Collapsed Bubble Mode:**
+   - A draggable `56x56px` glowing neon circle showing the **Predicted Color Ring** + **Confidence %** (e.g., Green glowing ring with `84%` inside). Tapping it expands the Mini-HUD.
+2. **Expanded Mini-HUD Panel (`290x230px` Draggable Glassmorphic Window):**
+   - **Top Drag Handle Bar:**
+     - Left: `"GuruPredict • HarshGuruJi"` in gold text.
+     - Right Icons: `[ 🎯 Calibrate ROI ]`, `[ ➖ Minimize to Bubble ]`, `[ ❌ Close Overlay ]`.
+   - **Live Status Strip:**
+     - Shows `Auto-Scan: ACTIVE 🟢` | `Period: #...046` | `Timer: 00:18`.
+   - **Compact Prediction Output Box:**
+     - **Color Signal:** Big glowing badge (`GREEN 84%` / `RED 79%` / `SKIP ⚠️`).
+     - **Size & Number Signal:** `BIG (5-9)` | `Hot Digits: [ 7, 9 ]`.
+     - **Step Indicator:** `Level 2 (3x) • Zig-Zag Pattern`.
+   - **Quick Micro-Controls (Bottom of Floating HUD):**
+     - `[ ⚡ Auto-Scan ON/OFF ]` toggle.
+     - Manual override micro-buttons (`[🔴]` `[🟣]` `[🟢]`) in case the user wants to input a result with 1 tap right from the floating window without switching apps.
+   - **Footer Watermark:** `"www.webguruji.online"`
+
+---
+
+### 4. MAIN APPLICATION SCREEN ARCHITECTURE (4 BOTTOM TABS)
+
+#### Tab 1: `Vision Command Center` (Home & Overlay Controller)
+* **Hero Floating HUD Launcher Card:**
+  - Big Neon Toggle Button: **`[ 🚀 LAUNCH FLOATING HUD OVERLAY ]`**.
+  - Permission Status Indicators:
+    - `Display Over Other Apps:` `Granted ✅`
+    - `Screen Vision OCR / Pixel Scanner:` `Active ✅`
+  - **Scan Mode Selector:** `[ 🤖 Full Auto Screen Scan ]` | `[ 🎯 Semi-Auto (Tap to Scan) ]` | `[ 👆 Manual Quick-Tap ]`.
+* **Interactive Live Floating HUD Preview & Simulator:**
+  - Renders the actual **Draggable Floating HUD Widget** on screen over a simulated live game board so the user can drag the **ROI Scanner Frame**, watch the **Laser Scan Animation** read the colors/numbers, and see the Floating HUD update in real time.
+* **Main Prediction Dashboard & Manual Input Deck:**
+  - Complete Color + Big/Small + Number (0–9) prediction display, circular confidence gauge, and 0–9 color-coded keypad.
+
+#### Tab 2: `Roadmaps & Matrix` (Visual Trend Analytics)
+* **4 KPI Cards:** `Session Accuracy %`, `Auto-Scanned Rounds`, `Win Streak`, `Market Volatility Index`.
+* **Big Road & Bead Plate Grids:** 6-row professional streak matrix and Red/Green/Violet distribution pressure bars.
+
+#### Tab 3: `Quant Lab` (Martingale & Fibonacci Capital Planner)
+* Dynamic virtual balance input, strategy selector (`Martingale 2x/3x`, `Fibonacci`, `Paroli Compounding`), and 8-Level recovery table.
+
+#### Tab 4: `HarshGuruJi Hub` (Brand Identity & Android Native Setup Guide)
+* **Official Founder Card:**
+  - **Brand:** `HarshGuruJi` | **Owner:** `Harsh Patel` | **Website:** `www.webguruji.online`
+  - Interactive `[ 🌐 Copy / Visit www.webguruji.online ]` button.
+* **Built-in Native Android Configuration Drawer:**
+  - Displays copy-ready `AndroidManifest.xml` permissions (`SYSTEM_ALERT_WINDOW`, `FOREGROUND_SERVICE_MEDIA_PROJECTION`) and `flutter_overlay_window` + `google_mlkit_text_recognition` wiring instructions for APK compilation.
+
+---
+
+### 5. CODE OUTPUT REQUIREMENTS
+1. Provide a **100% complete, single-file runnable `main.dart`** using standard Flutter packages (`flutter/material.dart`, `dart:async`, `dart:math`, `flutter/services.dart`).
+2. **Must include a fully interactive Draggable Floating HUD Overlay (`Stack` + `Positioned` + `GestureDetector`) AND a visual ROI Screen Scanner Simulator** directly inside the app so the user can immediately experience dragging the floating window, minimizing it to a bubble, calibrating the scan zone, and watching automatic OCR/Pixel detection work live.
+3. Zero placeholders or `// TODO` comments—implement the full 4-layer `GuruQuantumEngine`, draggable HUD, ROI scanner box, Big Road charts, and HarshGuruJi branding.

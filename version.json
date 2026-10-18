@@ -1,0 +1,10 @@
+{
+  "versionCode": 35,
+  "versionName": "3.5.0",
+  "buildTime": "2026-10-18T05:30:00Z",
+  "commitHash": "latest",
+  "releaseNotes": "GuruPredict v3.5 Sniper Pro Update:\n• Multi-Strategy Auto-Switcher (5 Parallel Sub-Models)\n• Crowd-Trap & Server Manipulation Detector\n• Period-ID & Digit Modulo Seed Parity Matrix\n• 82%+ Sniper Mode Filter\n• Confluence Diamond Sure-Shot Signal\n• Stop-Loss & Take-Profit Circuit Breaker\n• Floating Overlay HUD & Screen Vision Scanner\n• Automated GitHub Update Engine with 3-Hour Cooldown Buffer",
+  "minDelayHours": 3,
+  "repoUrl": "https://github.com/harshguruji01/guruprediction",
+  "rawVersionUrl": "https://raw.githubusercontent.com/harshguruji01/guruprediction/main/version.json"
+}
