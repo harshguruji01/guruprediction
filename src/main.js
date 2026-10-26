@@ -12,6 +12,7 @@ import { CandlestickChart } from './components/candlestickChart.js';
 import { floatingOverlay } from './components/floatingOverlay.js';
 import { calculateProfitLoss, calculateRiskPosition } from './components/calculators.js';
 import { colorEngine, NUMBER_MAP } from './services/colorEngine.js';
+import { liveColorSync } from './services/liveColorSync.js';
 
 class GuruPredictApp {
   constructor() {
@@ -1276,9 +1277,175 @@ class GuruPredictApp {
       const sessionTimerEl = document.getElementById('session-timer-val');
       if (sessionTimerEl) sessionTimerEl.textContent = `${m}m ${s}s`;
     }, 1000);
+
+    // ---------------------------------------------------------
+    // REAL-TIME 1-SECOND LIVE SERVER STREAM & SYNC
+    // ---------------------------------------------------------
+    liveColorSync.start();
+
+    // 1-Second Tick Listener
+    liveColorSync.subscribe((tickData) => {
+      // 1. Update Present Round UI
+      const presentPeriodEl = document.getElementById('live-present-period');
+      const futurePeriodEl = document.getElementById('live-future-period');
+      const countdownDigitsEl = document.getElementById('live-countdown-digits');
+      const progressBarEl = document.getElementById('live-timer-progress-bar');
+      const latencyEl = document.getElementById('live-server-latency');
+      const ticksEl = document.getElementById('live-fetch-ticks');
+      const feedTypeEl = document.getElementById('live-server-feed-type');
+
+      if (presentPeriodEl) presentPeriodEl.textContent = tickData.presentPeriod;
+      if (futurePeriodEl) futurePeriodEl.textContent = tickData.futurePeriod;
+
+      if (countdownDigitsEl) {
+        countdownDigitsEl.textContent = `00:${String(tickData.secondsRemaining).padStart(2, '0')}`;
+        if (tickData.secondsRemaining <= 10) {
+          countdownDigitsEl.classList.add('warning');
+        } else {
+          countdownDigitsEl.classList.remove('warning');
+        }
+      }
+
+      if (progressBarEl) {
+        const pct = (tickData.secondsRemaining / 60) * 100;
+        progressBarEl.style.width = `${pct}%`;
+      }
+
+      if (latencyEl) latencyEl.textContent = `${tickData.latencyMs}ms`;
+      if (ticksEl) ticksEl.textContent = `Tick #${tickData.fetchTicks}`;
+      if (feedTypeEl) {
+        feedTypeEl.textContent = tickData.isCustomApi
+          ? `Custom API Connected (${tickData.latencyMs}ms)`
+          : `Autonomous 1s Feed • Real Timing`;
+      }
+
+      // 2. Update 50-50% Probability Battle Gauge in Real-Time
+      this.update5050BattleGauge();
+    });
+
+    // Event when a round ends and new period starts
+    liveColorSync.onRoundResolved((round) => {
+      sound.playBuy();
+      notifications.showToast({
+        title: `Round #${round.period} Live Result`,
+        message: `Winning Color: ${round.color} ${round.number !== null ? '(' + round.number + ')' : ''}`,
+        type: 'info'
+      });
+      // Refresh historical dashboard view automatically
+      this.renderColorDashboard();
+    });
+
+    // Server Configuration Modal Handlers
+    const serverModal = document.getElementById('color-server-modal');
+    const openServerModalBtn = document.getElementById('btn-open-server-config');
+    const closeServerModalBtn = document.getElementById('btn-close-server-modal');
+    const saveServerApiBtn = document.getElementById('btn-save-server-api');
+    const testServerApiBtn = document.getElementById('btn-test-server-api');
+    const customApiInput = document.getElementById('custom-api-url-input');
+    const testStatusEl = document.getElementById('server-test-status');
+
+    if (openServerModalBtn && serverModal) {
+      openServerModalBtn.addEventListener('click', () => {
+        sound.playClick();
+        if (customApiInput) customApiInput.value = liveColorSync.customApiUrl;
+        if (testStatusEl) testStatusEl.style.display = 'none';
+        serverModal.style.display = 'flex';
+      });
+    }
+
+    if (closeServerModalBtn && serverModal) {
+      closeServerModalBtn.addEventListener('click', () => {
+        sound.playClick();
+        serverModal.style.display = 'none';
+      });
+    }
+
+    if (testServerApiBtn && customApiInput && testStatusEl) {
+      testServerApiBtn.addEventListener('click', async () => {
+        sound.playClick();
+        const url = customApiInput.value.trim();
+        if (!url) {
+          testStatusEl.style.display = 'block';
+          testStatusEl.style.background = 'rgba(0, 230, 118, 0.15)';
+          testStatusEl.style.color = '#00E676';
+          testStatusEl.textContent = '⚡ Using Built-in Autonomous 1s Live Server Engine (0ms config, active).';
+          return;
+        }
+        testStatusEl.style.display = 'block';
+        testStatusEl.style.background = 'rgba(56, 189, 248, 0.15)';
+        testStatusEl.style.color = '#38BDF8';
+        testStatusEl.textContent = 'Testing connection with 1s timeout...';
+
+        const res = await liveColorSync.testConnection(url);
+        if (res.success) {
+          testStatusEl.style.background = 'rgba(0, 230, 118, 0.15)';
+          testStatusEl.style.color = '#00E676';
+          testStatusEl.textContent = `✅ Server Responded in ${res.latency}ms. Connection Verified!`;
+        } else {
+          testStatusEl.style.background = 'rgba(255, 61, 87, 0.15)';
+          testStatusEl.style.color = '#FF3D57';
+          testStatusEl.textContent = `❌ Ping Error (${res.latency}ms): ${res.error}. (Tip: If CORS blocked, GuruPredict auto-uses internal 1s live engine).`;
+        }
+      });
+    }
+
+    if (saveServerApiBtn && customApiInput && serverModal) {
+      saveServerApiBtn.addEventListener('click', () => {
+        sound.playClick();
+        const url = customApiInput.value.trim();
+        liveColorSync.setCustomApiUrl(url);
+        notifications.showToast({
+          title: 'Server Settings Updated',
+          message: url ? 'Custom Server Endpoint connected (1s polling).' : 'Switched to Autonomous 1s Live Stream.',
+          type: 'success'
+        });
+        serverModal.style.display = 'none';
+      });
+    }
+  }
+
+  update5050BattleGauge() {
+    const res5050 = colorEngine.evaluateNextRound5050();
+
+    const greenPctEl = document.getElementById('gauge-green-pct');
+    const redPctEl = document.getElementById('gauge-red-pct');
+    const greenOddsEl = document.getElementById('gauge-green-odds');
+    const redOddsEl = document.getElementById('gauge-red-odds');
+    const barGreenEl = document.getElementById('battle-bar-green');
+    const barRedEl = document.getElementById('battle-bar-red');
+    const bigSmallPredEl = document.getElementById('mini-bigsmall-pred');
+    const bigSmallValsEl = document.getElementById('mini-bigsmall-vals');
+    const oddEvenPredEl = document.getElementById('mini-oddeven-pred');
+    const oddEvenValsEl = document.getElementById('mini-oddeven-vals');
+    const violetRiskEl = document.getElementById('mini-violet-risk-pct');
+    const reasonEnEl = document.getElementById('battle-reason-en');
+    const reasonHiEl = document.getElementById('battle-reason-hi');
+
+    if (greenPctEl) greenPctEl.textContent = `${res5050.greenProb}%`;
+    if (redPctEl) redPctEl.textContent = `${res5050.redProb}%`;
+    if (greenOddsEl) greenOddsEl.textContent = `${res5050.greenMultiplier} Odds`;
+    if (redOddsEl) redOddsEl.textContent = `${res5050.redMultiplier} Odds`;
+
+    if (barGreenEl) barGreenEl.style.width = `${res5050.greenProb}%`;
+    if (barRedEl) barRedEl.style.width = `${res5050.redProb}%`;
+
+    if (bigSmallPredEl) bigSmallPredEl.textContent = res5050.predictedSize;
+    if (bigSmallValsEl) bigSmallValsEl.textContent = `Big ${res5050.bigProb}% | Small ${res5050.smallProb}%`;
+
+    if (oddEvenPredEl) oddEvenPredEl.textContent = res5050.predictedParity;
+    if (oddEvenValsEl) oddEvenValsEl.textContent = `Odd ${res5050.oddProb}% | Even ${res5050.evenProb}%`;
+
+    if (violetRiskEl) {
+      violetRiskEl.textContent = `${res5050.violetHedgeProb}% (${res5050.violetGap >= 12 ? 'HIGH RISK' : 'Normal'})`;
+      violetRiskEl.style.color = res5050.violetGap >= 12 ? '#FF3D57' : '#E879F9';
+    }
+
+    if (reasonEnEl) reasonEnEl.textContent = res5050.reasonEn;
+    if (reasonHiEl) reasonHiEl.textContent = res5050.reasonHi;
   }
 
   renderColorDashboard() {
+    this.update5050BattleGauge();
     const heroContainer = document.getElementById('color-prediction-hero-container');
     if (!heroContainer) return;
 

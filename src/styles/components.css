@@ -1198,3 +1198,296 @@ input:checked + .toggle-slider::before {
   color: #F59E0B;
 }
 
+/* =========================================================
+   LIVE 1-SECOND SERVER STREAM & 50-50% PROBABILITY BATTLE HUD
+========================================================= */
+.live-server-bar {
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.15) 0%, rgba(15, 23, 42, 0.8) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
+}
+
+.live-beacon-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.live-radar-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #00E676;
+  position: relative;
+  box-shadow: 0 0 10px #00E676;
+}
+
+.live-radar-dot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid #00E676;
+  animation: liveBeaconPulse 1.5s infinite ease-out;
+}
+
+@keyframes liveBeaconPulse {
+  0% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+.live-server-badge {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #00E676;
+  text-transform: uppercase;
+}
+
+.live-ping-pill {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: #38BDF8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* PRESENT ROUND COUNTDOWN CARD */
+.present-round-card {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.present-round-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #00E676, #38BDF8, #C026D3);
+}
+
+.present-round-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.present-period-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.present-period-num {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: 1px;
+}
+
+.present-timer-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: 10px;
+}
+
+.countdown-digits {
+  font-family: var(--font-mono);
+  font-size: 32px;
+  font-weight: 800;
+  color: #38BDF8;
+  line-height: 1;
+  text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+}
+
+.countdown-digits.warning {
+  color: #FF3D57 !important;
+  text-shadow: 0 0 18px rgba(255, 61, 87, 0.7) !important;
+  animation: countdownBlink 0.6s infinite alternate;
+}
+
+@keyframes countdownBlink {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.04); }
+}
+
+.timer-progress-wrap {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.timer-progress-bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #00E676 0%, #38BDF8 60%, #FF3D57 100%);
+  transition: width 0.9s linear;
+}
+
+/* 50-50% PROBABILITY BATTLE GAUGE */
+.battle-gauge-card {
+  background: linear-gradient(135deg, rgba(20, 27, 45, 0.95) 0%, rgba(9, 13, 22, 0.98) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.battle-gauge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.battle-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #F59E0B;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.battle-teams-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.team-box-green {
+  text-align: left;
+}
+
+.team-box-red {
+  text-align: right;
+}
+
+.team-pct {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.team-pct.green { color: #00E676; text-shadow: 0 0 14px rgba(0, 230, 118, 0.4); }
+.team-pct.red { color: #FF3D57; text-shadow: 0 0 14px rgba(255, 61, 87, 0.4); }
+
+.team-odds-chip {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 3px;
+}
+
+.team-odds-green { background: rgba(0, 230, 118, 0.15); color: #00E676; border: 1px solid rgba(0, 230, 118, 0.3); }
+.team-odds-red { background: rgba(255, 61, 87, 0.15); color: #FF3D57; border: 1px solid rgba(255, 61, 87, 0.3); }
+
+.battle-center-badge {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: var(--radius-full);
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #F59E0B;
+  text-align: center;
+}
+
+.battle-dual-bar {
+  height: 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.battle-bar-g {
+  height: 100%;
+  background: linear-gradient(90deg, #00C853, #00E676);
+  transition: width 0.4s ease;
+}
+
+.battle-bar-r {
+  height: 100%;
+  background: linear-gradient(90deg, #FF3D57, #D50000);
+  transition: width 0.4s ease;
+}
+
+.battle-bar-center-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: #FFFFFF;
+  box-shadow: 0 0 6px #FFFFFF;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.secondary-5050-strip {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.mini-5050-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}
+
+.mini-5050-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.mini-5050-vals {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-top: 2px;
+}

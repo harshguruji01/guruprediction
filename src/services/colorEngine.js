@@ -92,20 +92,31 @@ export class ColorEngine {
     } catch (e) {}
   }
 
-  addRound({ color, number, period }) {
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  addRound({ color, number, period, time, timestamp }) {
     const periodId = period || String(Date.now()).slice(-9);
 
+    // Prevent duplicate entries for the same period ID
+    const existingIndex = this.history.findIndex(r => String(r.period) === String(periodId));
+    if (existingIndex !== -1) {
+      return this.history[existingIndex];
+    }
+
+    const now = new Date();
+    const timeStr = time || now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
     const round = {
-      period: periodId,
+      period: String(periodId),
       color: color.toUpperCase(),
       number: number !== undefined && number !== null && number !== '' ? parseInt(number, 10) : null,
       time: timeStr,
-      timestamp: Date.now()
+      timestamp: timestamp || Date.now()
     };
 
     this.history.unshift(round);
+    // Keep reasonable buffer (up to 200 rounds)
+    if (this.history.length > 200) {
+      this.history = this.history.slice(0, 200);
+    }
     this.saveHistory();
     return round;
   }
@@ -478,6 +489,149 @@ export class ColorEngine {
       red: calc(redPreds),
       violet: calc(violetPreds),
       skippedTotal: skipped
+    };
+  }
+
+  // =========================================================
+  // 50-50% PROBABILITY & REAL-TIME LIVE ODDS ENGINE
+  // =========================================================
+  evaluateNextRound5050() {
+    const totalRounds = this.history.length;
+    const stats50 = this.getStats(50);
+    const stats20 = this.getStats(20);
+
+    // Baseline: Pure 50-50% Coin-flip equilibrium
+    let greenProb = 50.0;
+    let redProb = 50.0;
+
+    if (totalRounds >= 10) {
+      // 1. Historical Deviation Factor from 50 rounds
+      const gCount = stats50.green;
+      const rCount = stats50.red;
+      const grTotal = (gCount + rCount) || 1;
+      const gRatio = gCount / grTotal; // e.g. 0.54
+
+      // Mean reversion pull: when one color is over-represented, opposite has +edge
+      // However, short-term momentum (last 20) also contributes
+      const g20 = stats20.green;
+      const r20 = stats20.red;
+      const gr20Total = (g20 + r20) || 1;
+      const g20Ratio = g20 / gr20Total;
+
+      // Weighted micro-deviation: 60% short-term momentum + 40% 50-round rebalance
+      const momentumDelta = (g20Ratio - 0.50) * 8.0; // max +/- 4%
+      const rebalanceDelta = (0.50 - gRatio) * 6.0;  // max +/- 3%
+
+      // Net deviation from 50.0%
+      let netDelta = momentumDelta + rebalanceDelta;
+
+      // Streak influence: If streak >= 3, mean reversal pressure increases
+      if (stats50.currentStreak.count >= 3) {
+        if (stats50.currentStreak.color === 'GREEN') {
+          netDelta -= (stats50.currentStreak.count >= 4 ? 3.0 : 1.5);
+        } else if (stats50.currentStreak.color === 'RED') {
+          netDelta += (stats50.currentStreak.count >= 4 ? 3.0 : 1.5);
+        }
+      }
+
+      // Bound probability realistically between 44.0% and 56.0% (genuine 50-50 range)
+      netDelta = Math.max(-6.0, Math.min(6.0, netDelta));
+      greenProb = Number((50.0 + netDelta).toFixed(1));
+      redProb = Number((100.0 - greenProb).toFixed(1));
+    }
+
+    // Live Payout Multipliers (standard 1.96x base payout adjusted for real-time odds)
+    const greenMultiplier = (1.96 * (50.0 / greenProb)).toFixed(2) + 'x';
+    const redMultiplier = (1.96 * (50.0 / redProb)).toFixed(2) + 'x';
+
+    // Big vs Small 50-50 Analysis
+    let bigCount = 0;
+    let smallCount = 0;
+    let oddCount = 0;
+    let evenCount = 0;
+    const sample = this.history.slice(0, 50).filter(r => r.number !== null && r.number !== undefined);
+    sample.forEach(r => {
+      if (r.number >= 5) bigCount++;
+      else smallCount++;
+      if (r.number % 2 !== 0) oddCount++;
+      else evenCount++;
+    });
+
+    const sampleTotal = sample.length || 1;
+    let bigProb = 50.0;
+    let smallProb = 50.0;
+    let oddProb = 50.0;
+    let evenProb = 50.0;
+
+    if (sample.length >= 10) {
+      const bigDelta = ((bigCount / sampleTotal) - 0.5) * 6.0;
+      bigProb = Number(Math.max(45.0, Math.min(55.0, 50.0 + bigDelta)).toFixed(1));
+      smallProb = Number((100.0 - bigProb).toFixed(1));
+
+      const oddDelta = ((oddCount / sampleTotal) - 0.5) * 6.0;
+      oddProb = Number(Math.max(45.0, Math.min(55.0, 50.0 + oddDelta)).toFixed(1));
+      evenProb = Number((100.0 - oddProb).toFixed(1));
+    }
+
+    // Violet Hedge Probability (0 and 5: 2 out of 10 numbers = ~10% probability)
+    let violetHedgeProb = 10.0;
+    if (stats50.violetGap >= 12) {
+      violetHedgeProb = Number(Math.min(18.0, 10.0 + (stats50.violetGap - 10) * 0.8).toFixed(1));
+    }
+
+    let predictedColor = 'GREEN';
+    let edgePercent = 0;
+    let edgeDirection = 'NEUTRAL';
+
+    if (greenProb > redProb) {
+      predictedColor = 'GREEN';
+      edgePercent = Number((greenProb - 50.0).toFixed(1));
+      edgeDirection = 'GREEN';
+    } else if (redProb > greenProb) {
+      predictedColor = 'RED';
+      edgePercent = Number((redProb - 50.0).toFixed(1));
+      edgeDirection = 'RED';
+    } else {
+      predictedColor = stats50.currentStreak.color === 'GREEN' ? 'RED' : 'GREEN';
+      edgePercent = 0.0;
+      edgeDirection = 'EVEN';
+    }
+
+    const predictedSize = bigProb >= smallProb ? 'BIG' : 'SMALL';
+    const predictedParity = oddProb >= evenProb ? 'ODD' : 'EVEN';
+
+    // Formulate bilingual reasons
+    let reasonEn = '';
+    let reasonHi = '';
+
+    if (edgePercent > 0) {
+      reasonEn = `50-50% Equilibrium Analysis: Past rounds show Green (${stats50.green}) vs Red (${stats50.red}). Calculated live odds give ${predictedColor} a +${edgePercent}% probability edge (${predictedColor === 'GREEN' ? greenProb : redProb}% vs ${predictedColor === 'GREEN' ? redProb : greenProb}%) with ${predictedColor === 'GREEN' ? greenMultiplier : redMultiplier} payout odds.`;
+      reasonHi = `50-50% संतुलन विश्लेषण: पिछले 50 राउंड्स में Green (${stats50.green}) और Red (${stats50.red}) दर्ज हैं। लाइव सांख्यिकी के अनुसार 50-50 बेसलाइन पर ${predictedColor} के पक्ष में +${edgePercent}% की बढ़त (${predictedColor === 'GREEN' ? greenProb : redProb}%) बन रही है।`;
+    } else {
+      reasonEn = `50-50% Perfect Balance: Green and Red are exactly at 50.0% vs 50.0% coin-flip equilibrium. High variance round.`;
+      reasonHi = `50-50% पूर्ण संतुलन: Green और Red दोनों 50.0% - 50.0% पर पूरी तरह संतुलित हैं। यह सिक्का उछालने (Coin-flip) जैसा न्यूट्रल राउंड है।`;
+    }
+
+    return {
+      greenProb,
+      redProb,
+      greenMultiplier,
+      redMultiplier,
+      bigProb,
+      smallProb,
+      predictedSize,
+      oddProb,
+      evenProb,
+      predictedParity,
+      violetHedgeProb,
+      violetGap: stats50.violetGap,
+      predictedColor,
+      edgePercent,
+      edgeDirection,
+      reasonEn,
+      reasonHi,
+      stats50,
+      totalRounds
     };
   }
 
