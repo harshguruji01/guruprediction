@@ -1,0 +1,19 @@
+# Robots.txt for prediction.webguruji.online
+# Official Trading Prediction & Android APK Platform by HarshGuruJi
+# Website: https://www.webguruji.online
+
+User-agent: *
+Allow: /
+Allow: /download
+Allow: /logo.png
+Allow: /favicon.png
+Allow: /manifest.json
+
+# Disallow private source trees
+Disallow: /src/
+Disallow: /build/
+Disallow: /android/
+Disallow: /.git/
+
+# Canonical Sitemap
+Sitemap: https://prediction.webguruji.online/sitemap.xml
