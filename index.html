@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>GuruPredict - Smart Trading Predictions | Developed by HarshGuruJi</title>
+  
+  <!-- Meta & PWA -->
+  <meta name="description" content="Production-ready mobile trading prediction and market probability app developed by HarshGuruJi. Real-time predictions for Stocks, Crypto, Forex, and Commodities." />
+  <meta name="theme-color" content="#090D16" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/png" href="/logo.png" />
+  <link rel="apple-touch-icon" href="/logo.png" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/src/styles/main.css" />
+  <link rel="stylesheet" href="/src/styles/components.css" />
+  <link rel="stylesheet" href="/src/styles/overlay.css" />
+  <link rel="stylesheet" href="/src/styles/accessibility.css" />
+</head>
+<body>
+  <!-- SCREEN READER LIVE ANNOUNCEMENT REGION (TalkBack) -->
+  <div id="sr-live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- TOAST NOTIFICATION ROOT -->
+  <div id="toast-container" class="toast-container" aria-live="assertive"></div>
+
+  <!-- SPLASH SCREEN -->
+  <div id="splash-screen" class="splash-screen">
+    <div class="splash-logo-wrap">
+      <img src="/logo.png" alt="GuruPredict Logo" class="splash-logo" />
+    </div>
+    <h1 class="splash-title">GuruPredict</h1>
+    <div class="splash-credit">Developed by HarshGuruJi</div>
+    <div class="splash-loader" aria-label="Loading GuruPredict..."></div>
+  </div>
+
+  <!-- RISK COMPLIANCE MODAL -->
+  <div id="risk-modal" class="risk-modal-overlay" style="display: none;">
+    <div class="risk-modal" role="dialog" aria-modal="true" aria-labelledby="risk-title">
+      <div class="risk-modal-icon">⚠️</div>
+      <h2 id="risk-title" class="risk-modal-title" data-i18n="disclaimerTitle">Important Risk & Compliance Notice</h2>
+      <p class="risk-modal-body" data-i18n="disclaimerModalText">
+        GuruPredict is an analytical & statistical probability platform designed exclusively for educational and informational simulations. All predictions are generated algorithmically using historical price patterns and statistical models. Past performance does not guarantee future results. There are no profit guarantees. Financial trading carries substantial risk of loss. HarshGuruJi and GuruPredict are not SEBI/FINRA registered financial advisors.
+      </p>
+      <button id="accept-risk-btn" class="risk-modal-btn" data-i18n="acceptDisclaimer">I Understand & Accept Risks</button>
+    </div>
+  </div>
+
+  <!-- OVERLAY PERMISSION & GUIDE MODAL -->
+  <div id="overlay-guide-modal" class="risk-modal-overlay" style="display: none;">
+    <div class="risk-modal" role="dialog" aria-modal="true" aria-labelledby="overlay-guide-title">
+      <div class="risk-modal-icon">📱</div>
+      <h2 id="overlay-guide-title" class="risk-modal-title" data-i18n="overlayPermissionTitle">Floating Overlay Permission</h2>
+      <p class="risk-modal-body">
+        <strong data-i18n="overlaySubtitle">Floating Mini-HUD over any charting or trading app</strong><br /><br />
+        <span data-i18n="overlayStep1">1. Tap 'Launch Floating Overlay' button below.</span><br />
+        <span data-i18n="overlayStep2">2. The HUD floats on screen with live prediction signals & alerts.</span><br />
+        <span data-i18n="overlayStep3">3. Drag freely, tap bubble to expand/minimize, or resize.</span>
+      </p>
+      <button id="guide-launch-overlay-btn" class="risk-modal-btn" data-i18n="launchOverlay">Launch Floating Overlay</button>
+      <button id="guide-close-btn" class="card-action-btn" style="width: 100%; margin-top: 10px; justify-content: center;" data-i18n="closeOverlay">Close</button>
+    </div>
+  </div>
+
+  <!-- MAIN APP ROOT -->
+  <div id="app-root">
+    <div class="mobile-shell">
+      <!-- HEADER -->
+      <header class="app-header" role="banner">
+        <div class="header-brand" id="brand-logo-trigger" role="button" tabindex="0" aria-label="GuruPredict Home">
+          <img src="/logo.png" alt="GuruPredict Logo" class="header-logo" />
+          <div class="header-title-box">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="header-app-name" data-i18n="appName">GuruPredict</span>
+              <span class="demo-mode-pill" title="Live API unavailable - running in realistic demo simulation mode">DEMO MODE</span>
+            </div>
+            <span class="header-dev-credit" data-i18n="devCredit">Developed by HarshGuruJi</span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <!-- Language Switcher -->
+          <button id="header-lang-btn" class="header-btn header-lang-btn" aria-label="Toggle Language between English and Hindi">
+            <span>🌐</span> <span id="current-lang-text">HI</span>
+          </button>
+
+          <!-- Voice Announcement Toggle -->
+          <button id="header-voice-btn" class="header-btn" aria-label="Toggle Voice Announcements" title="Toggle Voice Announcements">
+            <span id="voice-icon">🔊</span>
+          </button>
+
+          <!-- Floating Overlay Button -->
+          <button id="header-overlay-btn" class="header-btn" aria-label="Launch Floating Overlay HUD" title="Launch Floating Overlay HUD">
+            <span>📱</span>
+          </button>
+
+          <!-- Refresh Now -->
+          <button id="header-refresh-btn" class="header-btn" aria-label="Refresh Market Predictions" title="Refresh Signals">
+            <span>🔄</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- SCROLLABLE MAIN CONTENT -->
+      <main class="main-content" role="main">
+        <!-- ==============================================
+             VIEW 1: HOME (PREDICTIONS DASHBOARD)
+             ============================================== -->
+        <section id="view-home" class="view-pane active" aria-labelledby="home-view-heading">
+          <h2 id="home-view-heading" class="sr-only">Trading Prediction Dashboard</h2>
+
+          <!-- Top App Mode Switcher -->
+          <div class="app-mode-switcher" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+            <button class="switch-to-markets-btn cat-chip active" style="text-align: center; border-radius: var(--radius-md); padding: 10px 8px;">
+              📈 Markets AI (Trading)
+            </button>
+            <button class="switch-to-color-btn cat-chip" style="text-align: center; border-radius: var(--radius-md); padding: 10px 8px;">
+              🎨 Color AI (50% Trend & Skip)
+            </button>
+          </div>
+
+          <!-- Compliance Strip -->
+          <div class="compliance-strip" role="note">
+            <span data-i18n="disclaimerBanner">⚠️ Educational & Informational purposes only. Trading involves risk. Not financial advice.</span>
+          </div>
+
+          <!-- Sniper Mode Toggle Banner -->
+          <div class="sniper-banner">
+            <div class="sniper-info">
+              <span class="sniper-title">
+                <span>🎯</span> <span data-i18n="sniperMode">Sniper Mode</span>
+              </span>
+              <span class="sniper-subtitle" data-i18n="sniperDesc">Filters for 85%+ high conviction setups</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="sniper-toggle" aria-label="Toggle Sniper Entry Mode" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <!-- Market Category Chips -->
+          <nav class="category-scroll" aria-label="Filter predictions by market type">
+            <button class="cat-chip active" data-cat="all" data-i18n="catAll">All Markets</button>
+            <button class="cat-chip" data-cat="stocks" data-i18n="catStocks">Stocks</button>
+            <button class="cat-chip" data-cat="crypto" data-i18n="catCrypto">Crypto</button>
+            <button class="cat-chip" data-cat="forex" data-i18n="catForex">Forex</button>
+            <button class="cat-chip" data-cat="commodities" data-i18n="catCommodities">Commodities</button>
+          </nav>
+
+          <!-- Active Sub-Model Indicator Bar -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 11px; color: var(--text-muted);">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #00E676;"></span>
+              <span id="active-model-text">Active Brain: Fibonacci Confluence Matrix</span>
+            </div>
+            <div id="home-timer-pill" style="font-family: var(--font-mono); color: var(--color-accent);">Auto: 10s</div>
+          </div>
+
+          <!-- Predictions List Container -->
+          <div id="predictions-container" class="predictions-list" aria-live="polite">
+            <!-- Rendered dynamically by main.js -->
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW: COLOR AI (50% TARGET TREND ENGINE & SKIP MODE)
+             ============================================== -->
+        <section id="view-color" class="view-pane" aria-labelledby="color-view-heading">
+          <!-- Top App Mode Switcher -->
+          <div class="app-mode-switcher" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+            <button class="switch-to-markets-btn cat-chip" style="text-align: center; border-radius: var(--radius-md); padding: 10px 8px;">
+              📈 Markets AI (Trading)
+            </button>
+            <button class="switch-to-color-btn cat-chip active" style="text-align: center; border-radius: var(--radius-md); padding: 10px 8px;">
+              🎨 Color AI (50% Trend & Skip)
+            </button>
+          </div>
+
+          <!-- Color Compliance Strip -->
+          <div class="compliance-strip" role="note" style="border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.1);">
+            <span data-i18n="colorDisclaimerText">⚠️ GuruPredict gives probability-based analysis only. Game results are random and cannot be guaranteed. Skipping unclear rounds is a safety feature, not a winning guarantee.</span>
+          </div>
+
+          <!-- Skip Mode Controls Banner -->
+          <div class="sniper-banner" style="background: linear-gradient(135deg, rgba(192, 38, 211, 0.12) 0%, rgba(22, 30, 49, 0.95) 100%); border-color: rgba(192, 38, 211, 0.35);">
+            <div class="sniper-info">
+              <span class="sniper-title" style="color: #C026D3;">
+                <span>🛡️</span> <span data-i18n="skipModeSetting">Skip Round Mode</span>
+              </span>
+              <span class="sniper-subtitle" id="current-skip-mode-desc">Balanced Mode: Signals at 55+ score</span>
+            </div>
+            <select id="skip-mode-select" class="input-field" style="width: auto; padding: 6px 10px; font-weight: 700; font-size: 11px;">
+              <option value="BALANCED">Balanced Mode (Default)</option>
+              <option value="AGGRESSIVE">Aggressive (More Signals)</option>
+              <option value="SAFE">Safe Mode (Strong Only 70+)</option>
+              <option value="MANUAL">Manual Threshold</option>
+            </select>
+          </div>
+
+          <!-- Manual Threshold Slider (hidden unless manual selected) -->
+          <div id="manual-threshold-box" style="display: none; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 10px 14px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px;">
+              <span>Minimum Signal Score Required:</span>
+              <span id="manual-threshold-val" style="font-weight: 800; color: var(--color-gold);">65</span>
+            </div>
+            <input type="range" id="manual-threshold-slider" min="40" max="85" value="65" style="width: 100%; accent-color: var(--color-gold);" />
+          </div>
+
+          <!-- Rolling Auto-Throttle Notification Banner -->
+          <div id="auto-throttle-banner" style="display: none; background: rgba(255, 61, 87, 0.15); border: 1px solid #FF3D57; border-radius: var(--radius-md); padding: 8px 12px; margin-bottom: 12px; font-size: 11px; color: #FF3D57;">
+            ⚡ <strong>Auto-Throttle Active:</strong> Recent accuracy fell below 50%. Safety filter increased to protect discipline.
+          </div>
+
+          <!-- PREDICTION / SKIP ROUND HERO CARD CONTAINER -->
+          <div id="color-prediction-hero-container">
+            <!-- Rendered dynamically by main.js (either .skip-round-card or .color-pred-card) -->
+          </div>
+
+          <!-- 4-MODEL ENSEMBLE BREAKDOWN CARD -->
+          <div class="calc-card" style="margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <h3 class="calc-title" style="margin-bottom: 0;">
+                <span>🧠</span> <span data-i18n="ensembleStatus">4-Model Ensemble Engine</span>
+              </h3>
+              <span id="ensemble-agreement-pill" class="special-tag tag-diamond">3 of 4 Agree</span>
+            </div>
+            <div id="ensemble-models-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
+              <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                <div style="color: var(--text-muted); font-size: 10px;">1. Frequency Model</div>
+                <div id="mod-freq-vote" style="font-weight: 800; color: #00E676;">GREEN (60%)</div>
+                <div id="mod-freq-desc" style="font-size: 9.5px; color: var(--text-secondary); margin-top: 2px;">Green dominant in last 20/50</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                <div style="color: var(--text-muted); font-size: 10px;">2. Streak Model</div>
+                <div id="mod-streak-vote" style="font-weight: 800; color: #00E676;">GREEN (58%)</div>
+                <div id="mod-streak-desc" style="font-size: 9.5px; color: var(--text-secondary); margin-top: 2px;">Active streak continuation</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                <div style="color: var(--text-muted); font-size: 10px;">3. Violet Gap Model</div>
+                <div id="mod-gap-vote" style="font-weight: 800; color: var(--color-gold);">SKIP (45%)</div>
+                <div id="mod-gap-desc" style="font-size: 9.5px; color: var(--text-secondary); margin-top: 2px;">Violet gap within range</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                <div style="color: var(--text-muted); font-size: 10px;">4. Pattern Model</div>
+                <div id="mod-pattern-vote" style="font-weight: 800; color: #00E676;">GREEN (64%)</div>
+                <div id="mod-pattern-desc" style="font-size: 9.5px; color: var(--text-secondary); margin-top: 2px;">Zig-zag pair recurrence</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SMART PROBABILITY & STATS BAR -->
+          <div class="calc-card" style="margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <h3 class="calc-title" style="margin-bottom: 0;">
+                <span>📊</span> <span>Smart Probability & Streaks</span>
+              </h3>
+              <div class="chart-intervals" style="margin: 0;">
+                <button class="interval-btn color-history-filter-btn" data-history-limit="20">20</button>
+                <button class="interval-btn active color-history-filter-btn" data-history-limit="50">50</button>
+                <button class="interval-btn color-history-filter-btn" data-history-limit="100">100</button>
+              </div>
+            </div>
+
+            <!-- Frequency Progress Meter -->
+            <div style="margin-bottom: 12px;">
+              <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+                <span style="color: #00E676; font-weight: 700;">🟢 Green: <span id="stat-green-pct">52%</span> (<span id="stat-green-count">26</span>)</span>
+                <span style="color: #FF3D57; font-weight: 700;">🔴 Red: <span id="stat-red-pct">42%</span> (<span id="stat-red-count">21</span>)</span>
+                <span style="color: #C026D3; font-weight: 700;">🟣 Violet: <span id="stat-violet-pct">6%</span> (<span id="stat-violet-count">3</span>)</span>
+              </div>
+              <div style="height: 8px; width: 100%; border-radius: 4px; overflow: hidden; display: flex; background: rgba(255,255,255,0.1);">
+                <div id="stat-bar-green" style="height: 100%; width: 52%; background: #00E676;"></div>
+                <div id="stat-bar-red" style="height: 100%; width: 42%; background: #FF3D57;"></div>
+                <div id="stat-bar-violet" style="height: 100%; width: 6%; background: #C026D3;"></div>
+              </div>
+            </div>
+
+            <!-- Key Indicators Strip -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                <div style="font-size: 10px; color: var(--text-muted);" data-i18n="colorStreaks">Color Streaks</div>
+                <div id="stat-streak-display" style="font-size: 12px; font-weight: 800; color: #00E676; margin-top: 2px;">Green 2 in a row</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                <div style="font-size: 10px; color: var(--text-muted);" data-i18n="violetGap">Violet Gap</div>
+                <div id="stat-violet-gap-display" style="font-size: 12px; font-weight: 800; color: var(--color-gold); margin-top: 2px;">7 rounds since Violet</div>
+              </div>
+            </div>
+
+            <div id="stat-suggestion-text" style="font-size: 11px; color: var(--text-secondary); margin-top: 10px; padding: 6px 8px; background: rgba(56, 189, 248, 0.08); border-left: 3px solid #38BDF8; border-radius: 4px;">
+              Green frequency is higher in recent rounds. Violet is within normal statistical interval.
+            </div>
+          </div>
+
+          <!-- MANUAL ROUND RESULT ENTRY CARD -->
+          <div class="calc-card" style="margin-bottom: 14px;">
+            <h3 class="calc-title">
+              <span>✍️</span> <span data-i18n="enterRound">Record Round Result</span>
+            </h3>
+
+            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+              <div style="flex: 1;">
+                <label class="input-label" for="color-period-input" data-i18n="periodNumber">Period / Round ID</label>
+                <input type="text" id="color-period-input" class="input-field" placeholder="e.g. 20261026041" />
+              </div>
+              <div style="display: flex; align-items: flex-end;">
+                <button id="btn-next-period" class="card-action-btn" style="padding: 10px;" title="Generate next period number">Auto ⚡</button>
+              </div>
+            </div>
+
+            <!-- Color Selection Buttons -->
+            <label class="input-label" style="margin-bottom: 6px;">Select Winning Color:</label>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
+              <button class="color-select-btn btn-green-entry active" data-color="GREEN">
+                <span style="font-size: 16px;">🟢</span><br />GREEN
+              </button>
+              <button class="color-select-btn btn-red-entry" data-color="RED">
+                <span style="font-size: 16px;">🔴</span><br />RED
+              </button>
+              <button class="color-select-btn btn-violet-entry" data-color="VIOLET">
+                <span style="font-size: 16px;">🟣</span><br />VIOLET
+              </button>
+            </div>
+
+            <!-- Optional Number Pad (0 to 9) -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label class="input-label" style="margin-bottom: 0;">Drawn Number (0-9) - Optional:</label>
+              <span id="selected-number-tag" style="font-size: 11px; font-weight: 700; color: var(--color-accent);">Big / Small & Parity Auto-Tagged</span>
+            </div>
+            <div class="num-grid" id="number-entry-grid">
+              <button class="num-chip" data-num="0">0 (V+R)</button>
+              <button class="num-chip" data-num="1">1 (G)</button>
+              <button class="num-chip" data-num="2">2 (R)</button>
+              <button class="num-chip" data-num="3">3 (G)</button>
+              <button class="num-chip" data-num="4">4 (R)</button>
+              <button class="num-chip" data-num="5">5 (V+G)</button>
+              <button class="num-chip" data-num="6">6 (R)</button>
+              <button class="num-chip" data-num="7">7 (G)</button>
+              <button class="num-chip" data-num="8">8 (R)</button>
+              <button class="num-chip" data-num="9">9 (G)</button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 8px; margin-top: 10px;">
+              <button id="btn-save-color-round" class="risk-modal-btn" style="padding: 10px;" data-i18n="saveRoundBtn">Save Round Result</button>
+              <button id="btn-reset-color-demo" class="card-action-btn" style="justify-content: center;" data-i18n="resetDemoBtn">Demo Data</button>
+            </div>
+          </div>
+
+          <!-- RECENT ROUNDS TIMELINE & TABLE -->
+          <div class="calc-card" style="margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <h3 class="calc-title" style="margin-bottom: 0;">
+                <span>⏱️</span> <span data-i18n="lastRounds">Recent Rounds Timeline</span>
+              </h3>
+              <button id="btn-clear-color-history" style="background: none; border: none; font-size: 11px; color: var(--color-sell); cursor: pointer;">Clear All</button>
+            </div>
+
+            <!-- Circles Timeline -->
+            <div class="timeline-strip" id="color-timeline-circles">
+              <!-- Rendered dynamically -->
+            </div>
+
+            <!-- History List Container -->
+            <div id="color-rounds-history-list" style="max-height: 220px; overflow-y: auto; font-size: 11px;">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- PERSONAL ACCURACY TRACKER -->
+          <div class="accuracy-card" style="margin-bottom: 14px;">
+            <div class="acc-meter-wrap">
+              <div>
+                <div style="font-size: 12px; color: var(--text-secondary);" data-i18n="rollingAccuracy">Ensemble Rolling Accuracy</div>
+                <div class="acc-big-percent" id="color-rolling-acc-val">76.5%</div>
+              </div>
+              <div style="text-align: right;">
+                <span class="special-tag tag-diamond" id="color-acc-sample-tag">Last 20 Predictions</span>
+              </div>
+            </div>
+            <div class="acc-stats-grid">
+              <div class="acc-grid-item">
+                <div style="font-size: 11px; color: var(--text-muted);">Green Accuracy</div>
+                <div id="acc-green-val" style="font-size: 15px; font-weight: 800; color: #00E676;">78%</div>
+              </div>
+              <div class="acc-grid-item">
+                <div style="font-size: 11px; color: var(--text-muted);">Red Accuracy</div>
+                <div id="acc-red-val" style="font-size: 15px; font-weight: 800; color: #FF3D57;">74%</div>
+              </div>
+              <div class="acc-grid-item">
+                <div style="font-size: 11px; color: var(--text-muted);">Violet Calls</div>
+                <div id="acc-violet-val" style="font-size: 15px; font-weight: 800; color: #C026D3;">67%</div>
+              </div>
+              <div class="acc-grid-item">
+                <div style="font-size: 11px; color: var(--text-muted);">Skipped Rounds</div>
+                <div id="acc-skipped-val" style="font-size: 15px; font-weight: 800; color: var(--color-gold);">14 Skips</div>
+              </div>
+            </div>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 10px; text-align: center;">
+              * Past accuracy does not guarantee future results. Color prediction games are random.
+            </div>
+          </div>
+
+          <!-- RESPONSIBLE PLAY TOOLS -->
+          <div class="profile-card" style="margin-bottom: 16px;">
+            <h3 style="font-size: 14px; font-weight: 800; margin-bottom: 10px; color: var(--color-gold);" data-i18n="responsiblePlay">
+              <span>🛡️</span> Responsible Play & Session Safety
+            </h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+              <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: var(--radius-sm);">
+                <div style="font-size: 10px; color: var(--text-muted);" data-i18n="sessionTimer">Session Duration</div>
+                <div id="session-timer-val" style="font-size: 13px; font-weight: 800; color: var(--color-accent);">00m 00s</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: var(--radius-sm);">
+                <div style="font-size: 10px; color: var(--text-muted);" data-i18n="roundsInSession">Rounds Logged Today</div>
+                <div id="session-rounds-count" style="font-size: 13px; font-weight: 800; color: var(--text-primary);">24 Rounds</div>
+              </div>
+            </div>
+            <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.45;">
+              Color prediction games are chance-based and risky. GuruPredict does not guarantee winnings. Play responsibly and never risk money you cannot afford to lose.
+            </div>
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 2: PREDICTIONS (DEEP-DIVE EXPLORER)
+             ============================================== -->
+        <section id="view-predictions" class="view-pane" aria-labelledby="pred-view-heading">
+          <h2 id="pred-view-heading" style="font-size: 18px; font-weight: 800; margin-bottom: 12px;" data-i18n="navPredictions">Predictions</h2>
+
+          <div class="category-scroll">
+            <button class="cat-chip active" data-pred-filter="all">All Signals</button>
+            <button class="cat-chip" data-pred-filter="BUY">BUY Only 🟢</button>
+            <button class="cat-chip" data-pred-filter="SELL">SELL Only 🔴</button>
+            <button class="cat-chip" data-pred-filter="DIAMOND">💎 Diamond Sure-Shot</button>
+          </div>
+
+          <div id="deep-predictions-container" class="predictions-list">
+            <!-- Rendered dynamically -->
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 3: TRENDING TRADES
+             ============================================== -->
+        <section id="view-trending" class="view-pane" aria-labelledby="trending-heading">
+          <div style="margin-bottom: 12px;">
+            <h2 id="trending-heading" style="font-size: 18px; font-weight: 800;" data-i18n="trendingTitle">Trending Market Trades</h2>
+            <p style="font-size: 12px; color: var(--text-secondary);" data-i18n="trendingSubtitle">Top viral setups, volume surges & sentiment shifts</p>
+          </div>
+
+          <!-- Search Input -->
+          <div class="search-bar-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="search" id="trending-search" class="search-input" placeholder="Search stocks, crypto, forex..." aria-label="Search trending markets" />
+          </div>
+
+          <!-- Sort Chips -->
+          <div class="sort-chips-wrap" role="group" aria-label="Sort trending items">
+            <button class="sort-chip active" data-sort="gainers" data-i18n="sortGainers">Top Gainers</button>
+            <button class="sort-chip" data-sort="losers" data-i18n="sortLosers">Top Losers</button>
+            <button class="sort-chip" data-sort="volume" data-i18n="sortVolume">Highest Volume</button>
+            <button class="sort-chip" data-sort="confidence" data-i18n="sortPopular">High Confidence</button>
+          </div>
+
+          <!-- Trending List -->
+          <div id="trending-list-container">
+            <!-- Rendered dynamically -->
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 4: TRADING TOOLS SUITE
+             ============================================== -->
+        <section id="view-tools" class="view-pane" aria-labelledby="tools-heading">
+          <h2 id="tools-heading" style="font-size: 18px; font-weight: 800; margin-bottom: 12px;" data-i18n="toolsTitle">Trading Tools Suite</h2>
+
+          <!-- Subtab Navigation -->
+          <div class="tools-subtabs" role="tablist">
+            <button class="subtab-btn active" data-tool="chart" role="tab" data-i18n="tabChart">Chart</button>
+            <button class="subtab-btn" data-tool="watchlist" role="tab" data-i18n="tabWatchlist">Watchlist</button>
+            <button class="subtab-btn" data-tool="alerts" role="tab" data-i18n="tabAlerts">Alerts</button>
+            <button class="subtab-btn" data-tool="plcalc" role="tab" data-i18n="tabPLCalc">P/L Calc</button>
+            <button class="subtab-btn" data-tool="riskcalc" role="tab" data-i18n="tabRiskCalc">Risk Sizer</button>
+            <button class="subtab-btn" data-tool="accuracy" role="tab" data-i18n="tabAccuracy">Accuracy</button>
+            <button class="subtab-btn" data-tool="news" role="tab" data-i18n="tabNews">News</button>
+          </div>
+
+          <!-- Tool 1: Interactive Candlestick Chart -->
+          <div id="tool-chart-pane" class="tool-pane active">
+            <div class="chart-card">
+              <div class="chart-header">
+                <div>
+                  <select id="chart-asset-select" class="input-field" style="padding: 6px 10px; width: auto; font-weight: 700;" aria-label="Select asset to chart">
+                    <!-- Populated dynamically -->
+                  </select>
+                </div>
+                <div class="chart-intervals">
+                  <button class="interval-btn" data-int="1m">1M</button>
+                  <button class="interval-btn" data-int="5m">5M</button>
+                  <button class="interval-btn active" data-int="15m">15M</button>
+                  <button class="interval-btn" data-int="1h">1H</button>
+                  <button class="interval-btn" data-int="1d">1D</button>
+                </div>
+              </div>
+              <div class="canvas-container">
+                <canvas id="candlestick-canvas"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tool 2: Starred Watchlist -->
+          <div id="tool-watchlist-pane" class="tool-pane">
+            <div id="watchlist-container" class="predictions-list">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Tool 3: Price Alerts -->
+          <div id="tool-alerts-pane" class="tool-pane">
+            <div class="calc-card" style="margin-bottom: 14px;">
+              <h3 class="calc-title"><span>🔔</span> <span data-i18n="tabAlerts">Set New Price Alert</span></h3>
+              <div class="input-group">
+                <label class="input-label" for="alert-asset-select">Asset</label>
+                <select id="alert-asset-select" class="input-field"></select>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div class="input-group">
+                  <label class="input-label" for="alert-condition">Condition</label>
+                  <select id="alert-condition" class="input-field">
+                    <option value="ABOVE">Price Above (&gt;=)</option>
+                    <option value="BELOW">Price Below (&lt;=)</option>
+                  </select>
+                </div>
+                <div class="input-group">
+                  <label class="input-label" for="alert-price">Target Price</label>
+                  <input type="number" step="any" id="alert-price" class="input-field" placeholder="e.g. 98500" />
+                </div>
+              </div>
+              <button id="create-alert-btn" class="risk-modal-btn" style="padding: 10px;" data-i18n="setAlert">Create Alert</button>
+            </div>
+            <div id="alerts-list-container">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Tool 4: P/L Calculator -->
+          <div id="tool-plcalc-pane" class="tool-pane">
+            <div class="calc-card">
+              <h3 class="calc-title"><span>🧮</span> <span data-i18n="tabPLCalc">Profit / Loss Calculator</span></h3>
+              <div class="calc-segmented">
+                <button id="pl-btn-long" class="seg-btn active-long" data-i18n="longBuy">Long (Buy)</button>
+                <button id="pl-btn-short" class="seg-btn" data-i18n="shortSell">Short (Sell)</button>
+              </div>
+              <div class="input-group">
+                <label class="input-label" for="pl-entry" data-i18n="entryPrice">Entry Price ($ or ₹)</label>
+                <input type="number" id="pl-entry" class="input-field" value="96000" />
+              </div>
+              <div class="input-group">
+                <label class="input-label" for="pl-exit" data-i18n="exitPrice">Exit Price ($ or ₹)</label>
+                <input type="number" id="pl-exit" class="input-field" value="98500" />
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div class="input-group">
+                  <label class="input-label" for="pl-qty" data-i18n="quantity">Quantity / Lot</label>
+                  <input type="number" id="pl-qty" class="input-field" value="1" />
+                </div>
+                <div class="input-group">
+                  <label class="input-label" for="pl-lev" data-i18n="leverage">Leverage</label>
+                  <input type="number" id="pl-lev" class="input-field" value="1" min="1" max="100" />
+                </div>
+              </div>
+              <div class="calc-result-box">
+                <div class="calc-res-item">
+                  <span class="calc-res-label" data-i18n="netProfit">Estimated Net P/L</span>
+                  <span id="pl-net-val" class="calc-res-val">+$2,500.00</span>
+                </div>
+                <div class="calc-res-item">
+                  <span class="calc-res-label" data-i18n="roiPercent">Return on Investment (ROI)</span>
+                  <span id="pl-roi-val" class="calc-res-val">+2.60%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tool 5: Risk Management Calculator -->
+          <div id="tool-riskcalc-pane" class="tool-pane">
+            <div class="calc-card">
+              <h3 class="calc-title"><span>🛡️</span> <span data-i18n="tabRiskCalc">Position Size & Risk Calculator</span></h3>
+              <div class="input-group">
+                <label class="input-label" for="risk-balance" data-i18n="accountBalance">Account Capital ($)</label>
+                <input type="number" id="risk-balance" class="input-field" value="10000" />
+              </div>
+              <div class="input-group">
+                <label class="input-label" for="risk-pct" data-i18n="riskPercentage">Risk per Trade (%)</label>
+                <input type="number" id="risk-pct" class="input-field" value="1" step="0.5" />
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div class="input-group">
+                  <label class="input-label" for="risk-entry" data-i18n="entryPrice">Entry Price</label>
+                  <input type="number" id="risk-entry" class="input-field" value="96000" />
+                </div>
+                <div class="input-group">
+                  <label class="input-label" for="risk-sl" data-i18n="stopLoss">Stop Loss Price</label>
+                  <input type="number" id="risk-sl" class="input-field" value="95000" />
+                </div>
+              </div>
+              <div class="calc-result-box">
+                <div class="calc-res-item">
+                  <span class="calc-res-label" data-i18n="suggestedPosition">Suggested Position Size</span>
+                  <span id="risk-pos-val" class="calc-res-val">0.1000 Units</span>
+                </div>
+                <div class="calc-res-item">
+                  <span class="calc-res-label" data-i18n="maxLossAmount">Max Capital Risk ($)</span>
+                  <span id="risk-loss-val" class="calc-res-val" style="color: var(--color-sell);">$100.00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tool 6: Accuracy Tracker -->
+          <div id="tool-accuracy-pane" class="tool-pane">
+            <div class="accuracy-card">
+              <div class="acc-meter-wrap">
+                <div>
+                  <div style="font-size: 12px; color: var(--text-secondary);" data-i18n="overallWinRate">Rolling 30-Day Win Rate</div>
+                  <div class="acc-big-percent">81.4%</div>
+                </div>
+                <div style="text-align: right;">
+                  <span class="special-tag tag-diamond">🔥 5 Win Streak</span>
+                </div>
+              </div>
+              <div class="acc-stats-grid">
+                <div class="acc-grid-item">
+                  <div style="font-size: 11px; color: var(--text-muted);" data-i18n="winningTrades">Target Reached</div>
+                  <div style="font-size: 16px; font-weight: 800; color: var(--color-buy);">115 Wins</div>
+                </div>
+                <div class="acc-grid-item">
+                  <div style="font-size: 11px; color: var(--text-muted);" data-i18n="losingTrades">Stop-Loss Hit</div>
+                  <div style="font-size: 16px; font-weight: 800; color: var(--color-sell);">27 Losses</div>
+                </div>
+                <div class="acc-grid-item">
+                  <div style="font-size: 11px; color: var(--text-muted);">Crypto Win Rate</div>
+                  <div style="font-size: 15px; font-weight: 800;">84.2%</div>
+                </div>
+                <div class="acc-grid-item">
+                  <div style="font-size: 11px; color: var(--text-muted);">Stocks Win Rate</div>
+                  <div style="font-size: 15px; font-weight: 800;">79.5%</div>
+                </div>
+              </div>
+            </div>
+            <!-- Signal History Log -->
+            <h4 style="font-size: 13px; font-weight: 800; margin-bottom: 10px;">Recent Signal History</h4>
+            <div id="signal-history-container">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Tool 7: News Feed -->
+          <div id="tool-news-pane" class="tool-pane">
+            <div id="news-feed-container">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ==============================================
+             VIEW 5: PROFILE & SETTINGS
+             ============================================== -->
+        <section id="view-profile" class="view-pane" aria-labelledby="profile-heading">
+          <h2 id="profile-heading" style="font-size: 18px; font-weight: 800; margin-bottom: 12px;" data-i18n="settingsTitle">Settings & Preferences</h2>
+
+          <div class="profile-card">
+            <h3 style="font-size: 14px; font-weight: 800; margin-bottom: 12px;" data-i18n="userProfile">Trader Profile</h3>
+            <div class="input-group">
+              <label class="input-label" for="profile-name-input" data-i18n="traderName">Display Name</label>
+              <input type="text" id="profile-name-input" class="input-field" value="Guru Trader" />
+            </div>
+            <div class="input-group">
+              <label class="input-label" for="profile-market-select" data-i18n="defaultMarket">Default Asset Category</label>
+              <select id="profile-market-select" class="input-field">
+                <option value="all">All Markets</option>
+                <option value="stocks">Stocks</option>
+                <option value="crypto">Crypto</option>
+                <option value="forex">Forex</option>
+                <option value="commodities">Commodities</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Feature Toggles -->
+          <div class="profile-card">
+            <h3 style="font-size: 14px; font-weight: 800; margin-bottom: 12px;">App Features & Permissions</h3>
+
+            <!-- Floating Overlay -->
+            <div class="setting-row">
+              <div class="setting-text-col">
+                <span class="setting-title" data-i18n="overlayTitle">Display Over Other Apps</span>
+                <span class="setting-subtitle" data-i18n="overlaySubtitle">Floating Mini-HUD over any charting app</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="settings-overlay-toggle" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Voice Announcements -->
+            <div class="setting-row">
+              <div class="setting-text-col">
+                <span class="setting-title" data-i18n="voiceAnnounce">Voice Announcements (TTS)</span>
+                <span class="setting-subtitle" data-i18n="voiceAnnounceDesc">Speaks signals aloud for accessibility</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="settings-voice-toggle" checked />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Notifications -->
+            <div class="setting-row">
+              <div class="setting-text-col">
+                <span class="setting-title" data-i18n="notifications">Push Notifications</span>
+                <span class="setting-subtitle">Alerts for high-confidence predictions</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="settings-notify-toggle" checked />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Sound Alerts -->
+            <div class="setting-row">
+              <div class="setting-text-col">
+                <span class="setting-title" data-i18n="soundEffects">Sound Alerts</span>
+                <span class="setting-subtitle">Chimes for BUY / SELL signals</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="settings-sound-toggle" checked />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Haptic Vibration -->
+            <div class="setting-row">
+              <div class="setting-text-col">
+                <span class="setting-title" data-i18n="vibration">Haptic Vibration</span>
+                <span class="setting-subtitle">Vibrates on signal triggers</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="settings-vibrate-toggle" checked />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Theme Appearance -->
+            <div class="setting-row">
+              <div class="setting-text-col">
+                <span class="setting-title" data-i18n="themeMode">Theme Appearance</span>
+                <span class="setting-subtitle">Toggle Dark / Light Theme</span>
+              </div>
+              <button id="theme-toggle-btn" class="card-action-btn">🌙 Dark</button>
+            </div>
+
+            <!-- Accessibility Large Text -->
+            <div class="setting-row">
+              <div class="setting-text-col">
+                <span class="setting-title" data-i18n="largeTextMode">Large Text Mode</span>
+                <span class="setting-subtitle">Enhanced font scale for TalkBack</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="settings-largetext-toggle" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <!-- Accessibility High Contrast -->
+            <div class="setting-row">
+              <div class="setting-text-col">
+                <span class="setting-title" data-i18n="highContrastMode">High Contrast Mode</span>
+                <span class="setting-subtitle">Pure black & maximum border contrast</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="settings-contrast-toggle" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Developer Branding Box -->
+          <div class="dev-credit-box">
+            <img src="/logo.png" alt="Developer Logo" class="dev-avatar" />
+            <div class="dev-name" data-i18n="developerName">HarshGuruJi</div>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Lead Architect & Quant Developer</div>
+            <div class="dev-links">
+              <a href="https://www.webguruji.online" target="_blank" rel="noopener noreferrer" class="dev-link-btn">🌐 webguruji.online</a>
+              <span class="dev-link-btn" data-i18n="appVersion">Version 3.2.0</span>
+            </div>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 14px;" data-i18n="disclaimerBanner">
+              ⚠️ GuruPredict is for educational and informational purposes only. Trading involves risk. Not financial advice.
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- BOTTOM NAVIGATION -->
+      <nav class="app-bottom-nav" role="navigation" aria-label="Main Navigation">
+        <button class="nav-item active" data-target-view="view-home" aria-label="Home Dashboard">
+          <span class="nav-icon">📈</span>
+          <span class="nav-label" data-i18n="navHome">Markets</span>
+        </button>
+        <button class="nav-item" data-target-view="view-color" aria-label="Color AI & Skip Mode">
+          <span class="nav-icon">🎨</span>
+          <span class="nav-label" data-i18n="navColor">Color AI</span>
+        </button>
+        <button class="nav-item" data-target-view="view-predictions" aria-label="Predictions Explorer">
+          <span class="nav-icon">⚡</span>
+          <span class="nav-label" data-i18n="navPredictions">Signals</span>
+        </button>
+        <button class="nav-item" data-target-view="view-tools" aria-label="Trading Tools & Calculators">
+          <span class="nav-icon">🛠️</span>
+          <span class="nav-label" data-i18n="navTools">Tools</span>
+        </button>
+        <button class="nav-item" data-target-view="view-profile" aria-label="Profile and Settings">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label" data-i18n="navProfile">Profile</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <!-- MAIN APPLICATION LOGIC -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

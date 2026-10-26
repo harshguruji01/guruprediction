@@ -1,0 +1,25 @@
+{
+  "name": "GuruPredict - Trading Prediction App",
+  "short_name": "GuruPredict",
+  "description": "Production-ready mobile trading prediction and market probability app developed by HarshGuruJi.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B0E14",
+  "theme_color": "#00E676",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "productivity", "utilities"]
+}

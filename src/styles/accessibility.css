@@ -1,0 +1,64 @@
+/* Accessibility & Screen Reader Styles (TalkBack & WCAG AAA) */
+
+/* Visually hidden screen-reader live region */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* High Contrast Mode */
+body.high-contrast {
+  --bg-primary: #000000 !important;
+  --bg-secondary: #0A0A0A !important;
+  --bg-card: #121212 !important;
+  --border-subtle: #FFFFFF !important;
+  --border-card: #FFFFFF !important;
+  --text-primary: #FFFFFF !important;
+  --text-secondary: #EEEEEE !important;
+  --color-buy: #00FF66 !important;
+  --color-sell: #FF0033 !important;
+  --color-gold: #FFD700 !important;
+}
+
+body.high-contrast .pred-card {
+  border: 2px solid #FFFFFF !important;
+}
+
+/* Large Text Mode */
+body.large-text {
+  font-size: 115% !important;
+}
+
+body.large-text .header-app-name {
+  font-size: 19px !important;
+}
+
+body.large-text .pred-symbol {
+  font-size: 20px !important;
+}
+
+body.large-text .target-value {
+  font-size: 15px !important;
+}
+
+body.large-text .nav-item {
+  font-size: 12px !important;
+}
+
+/* Accessible Focus Indicators for Keyboard / Switch Navigation */
+:focus-visible {
+  outline: 3px solid var(--color-buy) !important;
+  outline-offset: 2px !important;
+}
+
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 3px solid #38BDF8 !important;
+  outline-offset: 3px !important;
+}

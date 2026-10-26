@@ -43,3 +43,11 @@ migrate_working_dir/
 !**/android/app/src/main/res/mipmap-*
 !**/assets/**
 !gurupredict.png
+
+# Node / Web builds
+node_modules/
+dist/
+.vite/
+
+# Binary APKs
+*.apk

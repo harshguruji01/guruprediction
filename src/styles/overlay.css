@@ -1,0 +1,365 @@
+/* Floating Overlay HUD ("Display Over Other Apps") Styles */
+
+.gp-overlay-root {
+  position: fixed;
+  z-index: 99999;
+  pointer-events: none;
+}
+
+.gp-overlay-root * {
+  pointer-events: auto;
+}
+
+.gp-overlay-hidden {
+  display: none !important;
+}
+
+/* =========================================================
+   COLLAPSED BUBBLE MODE
+========================================================= */
+.gp-overlay-bubble {
+  position: fixed;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #0F172A;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  z-index: 99999;
+  touch-action: none;
+  transition: transform 0.15s ease;
+}
+
+.gp-overlay-bubble:active {
+  cursor: grabbing;
+  transform: scale(0.95);
+}
+
+.gp-overlay-bubble.gp-hidden {
+  display: none;
+}
+
+.gp-bubble-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid var(--color-buy);
+  box-shadow: 0 0 15px var(--color-buy-glow);
+  animation: bubblePulse 2s infinite ease-in-out;
+}
+
+.gp-bubble-sell .gp-bubble-ring {
+  border-color: var(--color-sell);
+  box-shadow: 0 0 15px var(--color-sell-glow);
+}
+
+.gp-bubble-hold .gp-bubble-ring {
+  border-color: var(--color-hold);
+  box-shadow: 0 0 15px var(--color-hold-glow);
+}
+
+@keyframes bubblePulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.1); opacity: 0.4; }
+}
+
+.gp-bubble-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.gp-bubble-badge {
+  position: absolute;
+  bottom: -6px;
+  background: var(--color-buy);
+  color: #090D16;
+  font-size: 8.5px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  padding: 1px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.gp-bubble-sell .gp-bubble-badge {
+  background: var(--color-sell);
+  color: #FFFFFF;
+}
+
+/* =========================================================
+   EXPANDED MINI-HUD WINDOW
+========================================================= */
+.gp-overlay-hud {
+  position: fixed;
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 230, 118, 0.15);
+  display: none;
+  flex-direction: column;
+  z-index: 99999;
+  overflow: hidden;
+  touch-action: none;
+  animation: hudPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gp-overlay-hud.gp-visible {
+  display: flex;
+}
+
+@keyframes hudPop {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Size Variants */
+.gp-hud-compact {
+  width: 250px;
+}
+.gp-hud-standard {
+  width: 300px;
+}
+.gp-hud-wide {
+  width: 350px;
+}
+
+/* DRAG HANDLE BAR */
+.gp-hud-header {
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: grab;
+}
+
+.gp-hud-header:active {
+  cursor: grabbing;
+}
+
+.gp-hud-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.gp-hud-logo {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+}
+
+.gp-hud-title-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.gp-hud-app-name {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.gp-hud-author {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--color-gold);
+}
+
+.gp-hud-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.gp-hud-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.gp-hud-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+}
+
+.gp-hud-close:hover {
+  background: var(--color-sell);
+  color: #FFFFFF;
+}
+
+/* STATUS STRIP */
+.gp-hud-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.gp-hud-status-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gp-hud-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-buy);
+  box-shadow: 0 0 6px var(--color-buy);
+}
+
+.gp-hud-timer {
+  font-family: var(--font-mono);
+  color: var(--color-accent);
+}
+
+/* PREDICTION DISPLAY CARD */
+.gp-hud-card {
+  padding: 12px;
+}
+
+.gp-hud-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.gp-hud-symbol {
+  font-size: 14px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.gp-hud-dir-badge {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+}
+
+.gp-dir-buy {
+  background: var(--color-buy-bg);
+  border: 1px solid var(--color-buy);
+  color: var(--color-buy);
+}
+
+.gp-dir-sell {
+  background: var(--color-sell-bg);
+  border: 1px solid var(--color-sell);
+  color: var(--color-sell);
+}
+
+.gp-dir-hold {
+  background: var(--color-hold-bg);
+  border: 1px solid var(--color-hold);
+  color: var(--color-hold);
+}
+
+.gp-hud-metrics {
+  display: flex;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  font-size: 11px;
+}
+
+.gp-hud-metric {
+  display: flex;
+  flex-direction: column;
+}
+
+.gp-hud-label {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.gp-hud-val {
+  font-weight: 700;
+  font-family: var(--font-mono);
+  margin-top: 1px;
+}
+
+.gp-text-up { color: var(--color-buy); }
+.gp-text-down { color: var(--color-sell); }
+
+.gp-hud-sniper-badge {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid var(--color-gold);
+  color: var(--color-gold);
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 9.5px;
+  font-weight: 800;
+  text-align: center;
+  margin-top: 6px;
+}
+
+/* QUICK MICRO-CONTROLS */
+.gp-hud-controls {
+  display: flex;
+  gap: 6px;
+  padding: 0 12px 10px 12px;
+}
+
+.gp-hud-ctl-btn {
+  flex: 1;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.gp-hud-ctl-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: var(--color-accent);
+}
+
+.gp-ctl-toggle {
+  color: var(--color-buy);
+}
+
+/* FOOTER WATERMARK */
+.gp-hud-footer {
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  text-align: center;
+  font-size: 8.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
