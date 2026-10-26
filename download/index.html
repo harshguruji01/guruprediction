@@ -726,7 +726,7 @@
       </a>
       <div class="nav-actions">
         <a href="/" class="nav-web-link">Launch Web App</a>
-        <a href="#download" class="nav-btn-apk" id="nav-download-btn">
+        <a href="/GuruPredict.apk" download="GuruPredict.apk" class="nav-btn-apk download-trigger" id="nav-download-btn" title="Download GuruPredict APK">
           <span>📥</span> <span>Download APK</span>
         </a>
       </div>
@@ -752,7 +752,7 @@
 
       <!-- MAIN DOWNLOAD CTA -->
       <div class="hero-cta-wrapper" id="download">
-        <a href="https://prediction.webguruji.online/GuruPredict.apk" class="btn-download-main download-trigger" id="main-apk-download-btn">
+        <a href="/GuruPredict.apk" download="GuruPredict.apk" class="btn-download-main download-trigger" id="main-apk-download-btn" title="Download GuruPredict APK (Direct)">
           <span class="btn-download-main-text">
             <span>📥</span> Download GuruPredict APK
           </span>
@@ -1002,7 +1002,7 @@
 
       <div class="footer-links">
         <a href="/" class="footer-link">Web Dashboard</a>
-        <a href="#hero" class="footer-link">Download APK</a>
+        <a href="/GuruPredict.apk" download="GuruPredict.apk" class="footer-link download-trigger">Download APK</a>
         <a href="https://www.webguruji.online" target="_blank" rel="noopener noreferrer" class="footer-link">webguruji.online</a>
         <a href="https://github.com/harshguruji01/guruprediction" target="_blank" rel="noopener noreferrer" class="footer-link">GitHub</a>
       </div>
@@ -1025,15 +1025,24 @@
 
   <!-- JAVASCRIPT LOGIC -->
   <script>
-    // Configurable APK Download URL (Can be dynamically overridden)
-    window.GURUPREDICT_APK_URL = "https://prediction.webguruji.online/GuruPredict.apk";
+    // Primary APK Download URL
+    window.GURUPREDICT_APK_URL = "/GuruPredict.apk";
+
+    function triggerApkDownload() {
+      const a = document.createElement('a');
+      a.href = window.GURUPREDICT_APK_URL || '/GuruPredict.apk';
+      a.download = 'GuruPredict.apk';
+      a.setAttribute('download', 'GuruPredict.apk');
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showDownloadToast();
+    }
 
     // Bind all download buttons
-    document.querySelectorAll('.download-trigger, #nav-download-btn').forEach(btn => {
+    document.querySelectorAll('.download-trigger, #nav-download-btn, #main-apk-download-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        if (btn.getAttribute('href').startsWith('http') || btn.getAttribute('href').endsWith('.apk')) {
-          showDownloadToast();
-        }
+        showDownloadToast();
       });
     });
 
@@ -1043,8 +1052,16 @@
         toast.style.display = 'flex';
         setTimeout(() => {
           toast.style.display = 'none';
-        }, 5000);
+        }, 6000);
       }
+    }
+
+    // Auto-trigger if URL contains ?download=1, ?auto=1 or #download-now
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('download') === '1' || urlParams.get('auto') === '1' || window.location.hash === '#download-now') {
+      setTimeout(() => {
+        triggerApkDownload();
+      }, 500);
     }
 
     // Live 1-Second Heartbeat Simulation on Landing Page
